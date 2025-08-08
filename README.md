@@ -23,13 +23,20 @@ Smart Card Back-End System
 🧪 Kiểm thử thủ công qua Postman, hiển thị tài liệu API với Swagger UI.
 
 🛠️ Công nghệ sử dụng
-Thành phần	Công nghệ
-🧑‍💻 Ngôn ngữ	Java, TypeScript
-⚙️ Backend Framework	Spring Boot, Spring Security, Spring Data JPA
-💻 Frontend	React
-🛢️ Cơ sở dữ liệu	MySQL
-🔐 Xác thực	OAuth2, JWT, Keycloak
-🚀 Cache	Redis
-📄 API Docs	Swagger
-🧪 Kiểm thử	Postman
-📦 DevOps & Tools	Docker Compose
+    Thành phần	Công nghệ :
+
+    🧑‍💻 Ngôn ngữ	Java, TypeScript
+
+    ⚙️ Backend Framework: Spring Boot, Spring Security, Spring Data JPA
+
+    🛢️ Cơ sở dữ liệu : MySQL
+
+    🔐 Xác thực	OAuth2, JWT, Keycloak
+
+    🚀 Cache	Redis
+
+    📄 API Docs	Swagger
+
+    🧪 Kiểm thử	Postman
+
+    📦 DevOps & Tools	Docker Compose
