@@ -1,0 +1,98 @@
+spring:
+  application:
+    name: intelligent-card
+  datasource:
+    url: jdbc:mysql://localhost:3306/MyCard
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  redis:
+    host: localhost
+    port: 6380
+  jpa:
+    hibernate:
+      ddl-auto: update
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${ISSUER_URI}
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+    from: ${MAIL_FORM}
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+cloud:
+  aws:
+    credentials:
+      accessKey: ${CLOUD_ACCESSKEY}
+      secretKey: ${CLOUD_SECRETKEY}
+    stack:
+      auto: false
+    region:
+      staticValue: ${CLOUD_REGION}
+    bucket: ${CLOUD_BUCKET}
+bucket4j:
+  enabled: true
+  filters:
+    - cache-name: localCache
+      url: /api/auth/login
+      rate-limits:
+        - bandwidths:
+            - capacity: 5
+              refill-tokens: 5
+              refill-period: 10
+              refill-unit: seconds
+    - cache-name: localCache
+      url: /api/auth/refresh
+      rate-limits:
+        - bandwidths:
+            - capacity: 5
+              refill-tokens: 5
+              refill-period: 10
+              refill-unit: seconds
+
+url:
+  myself : http://localhost:5173/portfolio
+
+idp:
+  url: http://localhost:8081
+  client-id: ${IDP_CLIENT_ID}
+  client-secret: ${IDP_CLIENT_SECRET}
+  realm: ${IDP_REALM}
+  google-redirect-uri: http://localhost:5173/oauth2/callback
+
+#Config Qr
+Qr:
+  width: 300
+  height: 300
+
+#Config Payment
+payment:
+    vnp_TmnCode:
+    vnp_HashSecret:
+    vnp_Url: "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
+    returnUrl: "https://your-domain.com/vnpay-return"
+
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui
+    operationsSorter: method
+    tagsSorter: alpha
+
+logging:
+  level:
+    org.springframework.web: DEBUG
+    org.springframework.validation: DEBUG
