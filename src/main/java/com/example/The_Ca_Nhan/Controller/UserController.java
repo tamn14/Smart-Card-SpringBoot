@@ -101,7 +101,7 @@ public class UserController {
     }
 
     @GetMapping("/name/{name}")
-    public ApiResponse<Page<UsersResponse>> getAllUsers(@PathVariable("name") String name,
+    public ApiResponse<Page<UsersResponse>> getAllUsersByName(@PathVariable("name") String name,
                                                         @RequestParam(defaultValue = "0") int page,
                                                         @RequestParam(defaultValue = "10") int size) {
         Page<UsersResponse> responses = usersInterface.findByName(name, page, size);
@@ -113,16 +113,10 @@ public class UserController {
 
     @PostMapping("/update/image")
     public ApiResponse<Void> updateImage(@Valid @ModelAttribute AvatarUpdateRequest request) {
-        try {
-            usersInterface.UpdateAvatar(request);
-            return ApiResponse.<Void>builder()
-                    .mess("Success")
-                    .build();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-
+        usersInterface.UpdateAvatar(request);
+        return ApiResponse.<Void>builder()
+                .mess("Success")
+                .build();
 
     }
 
@@ -134,7 +128,6 @@ public class UserController {
                 .result(response)
                 .build();
     }
-
 
 
 }

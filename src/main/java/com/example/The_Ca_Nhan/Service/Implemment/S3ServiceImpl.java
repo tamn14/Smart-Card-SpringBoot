@@ -7,6 +7,7 @@ import com.example.The_Ca_Nhan.Properties.AWSProperties;
 import com.example.The_Ca_Nhan.Service.Interface.S3Interface;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -23,6 +24,7 @@ import static java.rmi.server.LogStream.log;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Profile("!test")
 public class S3ServiceImpl implements S3Interface {
     private final S3Client s3Client;
     private final AWSProperties awsProperties ;

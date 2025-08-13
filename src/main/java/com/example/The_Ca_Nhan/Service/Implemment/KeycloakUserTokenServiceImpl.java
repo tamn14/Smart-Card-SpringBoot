@@ -19,6 +19,7 @@ import com.example.The_Ca_Nhan.Service.Interface.AuthenticationService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -29,6 +30,7 @@ import java.time.Instant;
 @Transactional
 @RequiredArgsConstructor
 @Slf4j
+@Profile("!test")
 public class KeycloakUserTokenServiceImpl implements AuthenticationService {
     private final UsersRepository usersRepo;
     private final IdentityProviderRepo identityProviderRepo;

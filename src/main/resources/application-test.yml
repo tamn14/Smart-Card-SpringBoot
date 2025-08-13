@@ -1,0 +1,45 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://dummy-issuer-for-test
+  mail:
+    host: localhost
+    port: 2525
+    username: test@example.com
+    password: testpassword
+    properties:
+      mail.smtp.auth: false
+      mail.smtp.starttls.enable: false
+  redis:
+    host: localhost
+    port: 6379
+cloud:
+  aws:
+    credentials:
+      accessKey: dummyAccessKey
+      secretKey: dummySecretKey
+    region:
+      staticValue: dummy-region
+    bucket: dummy-bucket
+
+idp:
+  url: http://dummy-idp-url
+  client-id: dummy-client-id
+  client-secret: dummy-client-secret
+  realm: dummy-realm
+  google-redirect-uri: http://localhost:5173/oauth2/callback
+
+
+logging:
+  level:
+    org.springframework.web: ERROR
+    org.springframework.validation: ERROR

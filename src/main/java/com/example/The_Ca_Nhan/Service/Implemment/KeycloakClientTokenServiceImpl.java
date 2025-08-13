@@ -10,6 +10,7 @@ import com.example.The_Ca_Nhan.Repository.IdentityProviderRepo;
 import com.example.The_Ca_Nhan.Service.Interface.KeycloakClientTokenService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -17,6 +18,7 @@ import java.time.Instant;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Profile("!test")
 public class KeycloakClientTokenServiceImpl implements KeycloakClientTokenService {
     private final IdpProperties idpProperties;
     private final IdentityProviderRepo identityProviderRepo;
