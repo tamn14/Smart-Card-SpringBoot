@@ -1,5 +1,6 @@
 package com.example.The_Ca_Nhan.DTO.Request;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -9,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 @Builder
 public class CardRequest {
+    @NotNull
     private String name ;
     private String description ;
     private Integer price  ;

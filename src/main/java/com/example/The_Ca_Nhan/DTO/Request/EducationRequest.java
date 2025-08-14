@@ -1,5 +1,6 @@
 package com.example.The_Ca_Nhan.DTO.Request;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.w3c.dom.stylesheets.LinkStyle;
 
@@ -12,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class EducationRequest {
+    @NotNull
     private String schoolName ;
     private String degree ;
     private String startDate ;
