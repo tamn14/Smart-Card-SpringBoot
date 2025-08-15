@@ -1,5 +1,6 @@
-package com.example.The_Ca_Nhan.Controller;
+package com.example.The_Ca_Nhan.Controller.UnitTest;
 
+import com.example.The_Ca_Nhan.Controller.UserController;
 import com.example.The_Ca_Nhan.DTO.Request.UsersRequest;
 import com.example.The_Ca_Nhan.DTO.Request.UsersUpdateRequest;
 import com.example.The_Ca_Nhan.DTO.Response.UsersResponse;
@@ -11,7 +12,6 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;

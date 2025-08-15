@@ -1,8 +1,8 @@
-package com.example.The_Ca_Nhan.Controller;
+package com.example.The_Ca_Nhan.Controller.UnitTest;
 
+import com.example.The_Ca_Nhan.Controller.ProfilesController;
 import com.example.The_Ca_Nhan.DTO.Request.ProfilesRequest;
 import com.example.The_Ca_Nhan.DTO.Response.ProfilesResponse;
-import com.example.The_Ca_Nhan.DTO.Response.UsersResponse;
 import com.example.The_Ca_Nhan.Service.Interface.ProfilesInterface;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;

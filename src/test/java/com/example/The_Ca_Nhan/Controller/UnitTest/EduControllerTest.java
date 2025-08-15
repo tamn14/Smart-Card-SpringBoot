@@ -1,6 +1,6 @@
-package com.example.The_Ca_Nhan.Controller;
+package com.example.The_Ca_Nhan.Controller.UnitTest;
 
-import com.example.The_Ca_Nhan.DTO.Request.CardRequest;
+import com.example.The_Ca_Nhan.Controller.EducationController;
 import com.example.The_Ca_Nhan.DTO.Request.EducationRequest;
 import com.example.The_Ca_Nhan.DTO.Response.EducationResponse;
 import com.example.The_Ca_Nhan.Service.Interface.EducationInterface;
@@ -17,8 +17,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;

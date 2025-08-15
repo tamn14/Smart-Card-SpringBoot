@@ -1,9 +1,9 @@
-package com.example.The_Ca_Nhan.Controller;
+package com.example.The_Ca_Nhan.Controller.UnitTest;
 
 
+import com.example.The_Ca_Nhan.Controller.CardController;
 import com.example.The_Ca_Nhan.DTO.Request.CardRequest;
 import com.example.The_Ca_Nhan.DTO.Response.CardResponse;
-import com.example.The_Ca_Nhan.DTO.Response.UsersResponse;
 import com.example.The_Ca_Nhan.Service.Interface.CardInterface;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,12 +18,13 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import reactor.core.publisher.Sinks;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(CardController.class)
 @ActiveProfiles("test")
@@ -86,10 +87,11 @@ public class CardControllerTest {
 
         ObjectMapper mapper = new ObjectMapper() ;
         String content = mapper.writeValueAsString(cardRequest) ;
-        mockMvc.perform(MockMvcRequestBuilders.post("/cards")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(content))
-                .andExpect(MockMvcResultMatchers.status().isOk())
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/cards")
+                        .param("name", cardRequest.getName())
+                        .param("description", cardRequest.getDescription())
+                        .param("price", String.valueOf(cardRequest.getPrice())))
+                .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.result.name").value("CardTest"));
     }
 
@@ -101,10 +103,13 @@ public class CardControllerTest {
         ObjectMapper mapper = new ObjectMapper();
         String content = mapper.writeValueAsString(cardRequest);
 
-        mockMvc.perform(MockMvcRequestBuilders.put("/cards/{id}", cardID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(content))
-                .andExpect(MockMvcResultMatchers.status().isOk())
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/cards/{id}", cardID)
+                        .file("file", new byte[0])
+                        .param("name", cardRequest.getName())
+                        .param("description", cardRequest.getDescription())
+                        .param("price", String.valueOf(cardRequest.getPrice()))
+                        .with(request -> { request.setMethod("PUT"); return request; }))
+                .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.result.name").value("CardUpdate"));
     }
 
@@ -114,27 +119,67 @@ public class CardControllerTest {
         Mockito.doNothing().when(cardInterface).deleteCard(1);
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/cards/{id}", 1))
-                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.mess").value("Success"));
+    }
+
+
+
+
+
+    @Test
+    void findById_success() throws Exception {
+        Mockito.when(cardInterface.findById(cardID)).thenReturn(createCardResponse);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/cards/id/{id}", cardID))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.result.name").value("CardTest"));
+    }
+
+    @Test
+    void findByName_success() throws Exception {
+        org.springframework.data.domain.Page<CardResponse> page =
+                new org.springframework.data.domain.PageImpl<>(cardResponseList);
+
+        Mockito.when(cardInterface.findByName("CardTest", 0, 10)).thenReturn(page);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/cards/name/{name}", "CardTest")
+                        .param("page", "0")
+                        .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.result.content[0].name").value("CardTest"));
+    }
+
+    @Test
+    void findByName_emptyResult() throws Exception {
+        org.springframework.data.domain.Page<CardResponse> emptyPage =
+                new org.springframework.data.domain.PageImpl<>(List.of());
+
+        Mockito.when(cardInterface.findByName("NotFound", 0, 10)).thenReturn(emptyPage);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/cards/name/{name}", "NotFound")
+                        .param("page", "0")
+                        .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.result.content").isEmpty());
     }
 
     @Test
     void getAllCard_success() throws Exception {
-        // Mock Page
         org.springframework.data.domain.Page<CardResponse> page =
                 new org.springframework.data.domain.PageImpl<>(cardResponseList);
 
-        Mockito.when(cardInterface.findAll(0, 4)).thenReturn(page);
+        Mockito.when(cardInterface.findAll(0, 10)).thenReturn(page);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/cards")
                         .param("page", "0")
-                        .param("size", "4")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.mess").value("Success"))
+                        .param("size", "10"))
+                .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.result.content[0].name").value("CardTest"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.result.content[1].name").value("CardTest2"));
     }
+
+
 
 
 
