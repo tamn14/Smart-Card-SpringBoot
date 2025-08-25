@@ -27,8 +27,15 @@ public class SercurityConfig {
     private final String[] PUBLIC_ENDPOINTS_POST = {"/auth/login",
             "/auth/register",
             "/auth/logout" ,
-            "mail/customer"
+            "/mail/customer",
+            "/users",
+
            };
+
+    private final String[] PUBLIC_ENDPOINTS_PATCH = {
+            "/users/verify/**",
+
+    };
 
     private final String[] PUBLIC_ENDPOINTS_GET = {
             "/cards",
@@ -44,6 +51,8 @@ public class SercurityConfig {
 
 
     } ;
+
+
 
 
     @Bean
@@ -63,6 +72,7 @@ public class SercurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS_POST).permitAll()
                         .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINTS_GET).permitAll()
+                        .requestMatchers(HttpMethod.PATCH, PUBLIC_ENDPOINTS_PATCH).permitAll()
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",

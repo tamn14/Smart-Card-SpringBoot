@@ -14,7 +14,6 @@ public class TheCaNhanApplication {
 			Dotenv dotenv = Dotenv.load();
 			dotenv.entries().forEach(entry -> System.setProperty(entry.getKey(), entry.getValue()));
 		} catch (Exception e) {
-			// Xử lý lỗi nếu file .env không tồn tại, có thể bỏ qua nếu đang chạy trên server
 			System.err.println("Could not load .env file. Falling back to system environment variables.");
 		}
 		SpringApplication.run(TheCaNhanApplication.class, args);

@@ -1,18 +1,13 @@
 package com.example.The_Ca_Nhan.Service.Implemment;
 
 import com.example.The_Ca_Nhan.Entity.Orders;
-import com.example.The_Ca_Nhan.Exception.AppException;
-import com.example.The_Ca_Nhan.Exception.ErrorCode;
 import com.example.The_Ca_Nhan.Properties.QrProperties;
-import com.example.The_Ca_Nhan.Repository.OrdersRepository;
 import com.example.The_Ca_Nhan.Service.Interface.QrInterface;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
-import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
-import jakarta.xml.bind.DatatypeConverter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,32 +19,39 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class QrServiceImpl implements QrInterface {
 
-    private final QrProperties qrProperties ;
+    private final QrProperties qrProperties;
 
+    /**
+     * Sinh QR từ URL thanh toán
+     */
     @Override
-    public byte[] generateQRCodeToFile(String json, int width, int height) throws WriterException, IOException {
-        QRCodeWriter qrCodeWriter = new QRCodeWriter() ;
-        Map<EncodeHintType , Object> hintTypeObjectMap = new HashMap<>() ;
-        hintTypeObjectMap.put(EncodeHintType.CHARACTER_SET , "UTF-8") ;
+    public byte[] generateQRCodeToFile(String url, int width, int height) throws IOException {
+        try {
+            QRCodeWriter qrCodeWriter = new QRCodeWriter();
+            Map<EncodeHintType, Object> hintMap = new HashMap<>();
+            hintMap.put(EncodeHintType.CHARACTER_SET, "UTF-8");
+            hintMap.put(EncodeHintType.ERROR_CORRECTION, com.google.zxing.qrcode.decoder.ErrorCorrectionLevel.H);
+            hintMap.put(EncodeHintType.MARGIN, 1);
 
-        BitMatrix bitMatrix = qrCodeWriter.encode(json, BarcodeFormat.QR_CODE, width, height, hintTypeObjectMap);
-        ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream();
-        MatrixToImageWriter.writeToStream(bitMatrix, "PNG", pngOutputStream);
-        return pngOutputStream.toByteArray();
-
+            BitMatrix bitMatrix = qrCodeWriter.encode(url, BarcodeFormat.QR_CODE, width, height, hintMap);
+            ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream();
+            MatrixToImageWriter.writeToStream(bitMatrix, "PNG", pngOutputStream);
+            return pngOutputStream.toByteArray();
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot generate QR code", e);
+        }
     }
 
-
+    /**
+     * Tạo URL thanh toán VNPAY cho đơn hàng
+     */
     @Override
     public String createVnpayPaymentUrl(Orders order) {
         String vnp_TmnCode = qrProperties.getVnp_TmnCode();
@@ -57,68 +59,70 @@ public class QrServiceImpl implements QrInterface {
         String vnp_Url = qrProperties.getVnp_Url();
         String returnUrl = qrProperties.getReturnUrl();
 
-        int amount = order.getTotalAmount() * 100; // VNPAY tính đơn vị là VND * 100
+        int amount = order.getTotalAmount() * 100; // VNPAY dùng đơn vị *100
 
-        Map<String, String> params = new TreeMap<>();
+        Map<String, String> params = new HashMap<>();
         params.put("vnp_Version", "2.1.0");
         params.put("vnp_Command", "pay");
         params.put("vnp_TmnCode", vnp_TmnCode);
         params.put("vnp_Amount", String.valueOf(amount));
         params.put("vnp_CurrCode", "VND");
-        params.put("vnp_TxnRef", String.valueOf(order.getOrderId())); // mã đơn
+        params.put("vnp_TxnRef", String.valueOf(order.getOrderId()));
         params.put("vnp_OrderInfo", "Thanh toan don hang #" + order.getOrderId());
         params.put("vnp_OrderType", "billpayment");
         params.put("vnp_Locale", "vn");
         params.put("vnp_ReturnUrl", returnUrl);
-        params.put("vnp_IpAddr", "127.0.0.1"); // hoặc IP thật
+        params.put("vnp_IpAddr", "127.0.0.1");
         params.put("vnp_CreateDate", new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
 
-        // Bước 1: tạo chuỗi dữ liệu để ký
+        // Sắp xếp theo Alphabet A-Z để ký
+        List<String> fieldNames = new ArrayList<>(params.keySet());
+        Collections.sort(fieldNames);
+
         StringBuilder signData = new StringBuilder();
         StringBuilder queryUrl = new StringBuilder();
 
-        for (Map.Entry<String, String> entry : params.entrySet()) {
-            if (queryUrl.length() > 0) {
-                queryUrl.append("&");
-                signData.append("&");
+        for (int i = 0; i < fieldNames.size(); i++) {
+            String fieldName = fieldNames.get(i);
+            String fieldValue = params.get(fieldName);
+            if ((fieldValue != null) && (fieldValue.length() > 0)) {
+                // build data để ký
+                signData.append(fieldName).append("=").append(fieldValue);
+
+                // build query string encode cho URL
+                queryUrl.append(fieldName).append("=")
+                        .append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8));
+
+                if (i < fieldNames.size() - 1) {
+                    signData.append("&");
+                    queryUrl.append("&");
+                }
             }
-            queryUrl.append(entry.getKey()).append("=").append(URLEncoder.encode(entry.getValue(), StandardCharsets.US_ASCII));
-            signData.append(entry.getKey()).append("=").append(entry.getValue());
         }
 
-        // Bước 2: ký SHA256
-        String secureHash = hmacSHA512(vnp_HashSecret, signData.toString());
-
-        queryUrl.append("&vnp_SecureHash=").append(secureHash);
+        // Tạo chữ ký HMAC SHA512
+        String vnp_SecureHash = hmacSHA512(vnp_HashSecret, signData.toString());
+        queryUrl.append("&vnp_SecureHash=").append(vnp_SecureHash);
 
         return vnp_Url + "?" + queryUrl.toString();
     }
 
     private String hmacSHA512(String key, String data) {
         try {
-            SecretKeySpec secretKeySpec = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "HmacSHA512");
-            Mac mac = Mac.getInstance("HmacSHA512");
-            mac.init(secretKeySpec);
-            byte[] hashBytes = mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
-            StringBuilder sb = new StringBuilder();
-            for (byte b : hashBytes) {
-                sb.append(String.format("%02x", b));
+            if (key == null || data == null) {
+                return null;
             }
-            return sb.toString();
-        } catch (Exception e) {
-            throw new RuntimeException("Cannot generate HMAC SHA512", e);
+            Mac hmac512 = Mac.getInstance("HmacSHA512");
+            SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "HmacSHA512");
+            hmac512.init(secretKey);
+            byte[] bytes = hmac512.doFinal(data.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hash = new StringBuilder();
+            for (byte b : bytes) {
+                hash.append(String.format("%02x", b));
+            }
+            return hash.toString();
+        } catch (Exception ex) {
+            throw new RuntimeException("Cannot sign data with HMAC SHA512", ex);
         }
     }
-
-
 }
-
-
-
-
-
-
-
-
-
-

@@ -132,19 +132,24 @@ public class OrderServiceImpl implements OrdersInterface {
     }
 
     @Override
-    public byte[] QrForPayment(  int orderId) {
+    public byte[] QrForPayment(int orderId) {
+        // Lấy user đang login
         Users users = extract.getUserInFlowLogin();
         Orders orders = getOrdersById(orderId);
         checkAuthenticated(users, orders);
 
+        // Tạo URL thanh toán VNPAY
         String paymentUrl = qrInterface.createVnpayPaymentUrl(orders);
+
         try {
+            // Tạo QR code size lớn, correction level cao
             return qrInterface.generateQRCodeToFile(paymentUrl, 300, 300);
         } catch (Exception e) {
             throw new AppException(ErrorCode.CANNOT_CREATE_QR);
         }
-
     }
+
+
 
     @Override
     public OrdersResponse updateOrders(OrdersUpdateRequest ordersUpdateRequest, int orderId) {
